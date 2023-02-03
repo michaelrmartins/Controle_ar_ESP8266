@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2023-02-03T13:11:34Z</date>
+    <value_maps>
+        <value_map>
+            <name>IOT - Ar Error</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Ok</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Failure</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>IOT - Ar Status</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Desligado</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Ligado</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>

@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2023-02-03T13:09:30Z</date>
+    <groups>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>ESP DHT Sensor - JSON</template>
+            <name>ESP DHT Sensor - JSON</name>
+            <description>Template para o Sensor de Temperatura usando o Módulo ESP8622 e recebendo os dados via JSON.&#13;
+&#13;
+V 1.0&#13;
+&#13;
+Michael Martins - 2023</description>
+            <templates>
+                <template>
+                    <name>Template Module ICMP Ping</name>
+                </template>
+            </templates>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Air Conditioning 1</name>
+                </application>
+                <application>
+                    <name>Air Conditioning 2</name>
+                </application>
+                <application>
+                    <name>Ambient Sensor</name>
+                </application>
+                <application>
+                    <name>Connection Information</name>
+                </application>
+                <application>
+                    <name>Hardware Information</name>
+                </application>
+                <application>
+                    <name>Timer</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Air Conditioning 1 - Error</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.air.conditioning.1.error</key>
+                    <delay>0</delay>
+                    <applications>
+                        <application>
+                            <name>Air Conditioning 1</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Arduino IOT - Ar Error</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.RELAY_1_ERROR</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}=1</expression>
+                            <name>Problema no Ar Condicionado 1</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Air Conditioning 1 - Status</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.air.conditioning.1.status</key>
+                    <delay>0</delay>
+                    <history>12d</history>
+                    <applications>
+                        <application>
+                            <name>Air Conditioning 1</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Arduino IOT - Ar Status</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.RELAY_1_STATUS</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Air Conditioning 2 - Error</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.air.conditioning.2.error</key>
+                    <delay>0</delay>
+                    <applications>
+                        <application>
+                            <name>Air Conditioning 2</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Arduino IOT - Ar Error</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.RELAY_2_ERROR</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}=1</expression>
+                            <name>Problema no Ar Condicionado 2</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Air Conditioning 2 - Status</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.air.conditioning.2.status</key>
+                    <delay>0</delay>
+                    <history>12d</history>
+                    <applications>
+                        <application>
+                            <name>Air Conditioning 2</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Arduino IOT - Ar Status</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.RELAY_2_STATUS</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Arduino Get Json</name>
+                    <type>HTTP_AGENT</type>
+                    <key>arduino.get.json</key>
+                    <history>1h</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Hardware Information</name>
+                        </application>
+                    </applications>
+                    <timeout>5s</timeout>
+                    <url>{HOST.IP}</url>
+                </item>
+                <item>
+                    <name>Hardware ID</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.hardware.id</key>
+                    <delay>0</delay>
+                    <history>10d</history>
+                    <trends>0</trends>
+                    <applications>
+                        <application>
+                            <name>Hardware Information</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.ID</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Hardware location</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.hardware.location</key>
+                    <delay>0</delay>
+                    <history>10d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <applications>
+                        <application>
+                            <name>Hardware Information</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.LOCATION</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Hardware Time Counter</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.hardware.time.counter</key>
+                    <delay>0</delay>
+                    <applications>
+                        <application>
+                            <name>Timer</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.TIME_COUNTER</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Hardware Time Regressive</name>
+                    <type>CALCULATED</type>
+                    <key>arduino.hardware.time.regressive</key>
+                    <history>2d</history>
+                    <trends>0</trends>
+                    <value_type>FLOAT</value_type>
+                    <params>last(&quot;arduino.hardware.time.counter&quot;)-{$INVERTER_TIME}</params>
+                    <applications>
+                        <application>
+                            <name>Timer</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>Singal Quality</name>
+                    <type>CALCULATED</type>
+                    <key>arduino.network.wifi.quality</key>
+                    <history>30d</history>
+                    <trends>90d</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <params>last(&quot;arduino.network.wifi.rssi&quot;)+100</params>
+                    <description>Signal Quality Formula:&#13;
+&#13;
+=2*(RSSI+100)</description>
+                    <applications>
+                        <application>
+                            <name>Connection Information</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>2</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>Wifi Signal Strength</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.network.wifi.rssi</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <applications>
+                        <application>
+                            <name>Connection Information</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.WIFI_SIGNAL_RSSI</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Wifi Connected SSID</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.network.wifi.ssid</key>
+                    <delay>0</delay>
+                    <history>10d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <applications>
+                        <application>
+                            <name>Connection Information</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.SSID_CONNECTED</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Sensor 1 - Humidity</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.sensor.humidity.1</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <applications>
+                        <application>
+                            <name>Ambient Sensor</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.SENSOR_HUMIDITY_1</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Sensor 1 - Temperature</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.sensor.temp.1</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>°C</units>
+                    <applications>
+                        <application>
+                            <name>Ambient Sensor</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.SENSOR_TEMP_1</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&gt;={$TEMPERATURE_LIMIT_HIGH}</expression>
+                            <name>Temperatura Alta - {ITEM.VALUE}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Sensor 1 - Trimmer</name>
+                    <type>DEPENDENT</type>
+                    <key>arduino.sensor.trim.1</key>
+                    <delay>0</delay>
+                    <history>1h</history>
+                    <trends>0</trends>
+                    <value_type>FLOAT</value_type>
+                    <description>Trim are a Temperature Calibration Value using trimmer board potentiometer</description>
+                    <applications>
+                        <application>
+                            <name>Ambient Sensor</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.SENSOR_TEMP_1_TRIM_VALUE</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>arduino.get.json</key>
+                    </master_item>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$INVERTER_TIME}</macro>
+                    <value>86000</value>
+                    <description>Time Limit do Invert</description>
+                </macro>
+                <macro>
+                    <macro>{$TEMPERATURE_LIMIT_HIGH}</macro>
+                    <value>26</value>
+                    <description>Ambient Temperature threshold</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <graphs>
+        <graph>
+            <name>Air Inversion Status</name>
+            <graph_items>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>199C0D</color>
+                    <item>
+                        <host>ESP DHT Sensor - JSON</host>
+                        <key>arduino.air.conditioning.1.status</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>2</sortorder>
+                    <color>F63100</color>
+                    <item>
+                        <host>ESP DHT Sensor - JSON</host>
+                        <key>arduino.air.conditioning.2.status</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>Humidity</name>
+            <graph_items>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>00FFFF</color>
+                    <calc_fnc>MAX</calc_fnc>
+                    <item>
+                        <host>ESP DHT Sensor - JSON</host>
+                        <key>arduino.sensor.humidity.1</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>Temperature</name>
+            <graph_items>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>199C0D</color>
+                    <calc_fnc>MAX</calc_fnc>
+                    <item>
+                        <host>ESP DHT Sensor - JSON</host>
+                        <key>arduino.sensor.temp.1</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+    <value_maps>
+        <value_map>
+            <name>Arduino IOT - Ar Error</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Ok</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Failure</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>Arduino IOT - Ar Status</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Desligado</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Ligado</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
