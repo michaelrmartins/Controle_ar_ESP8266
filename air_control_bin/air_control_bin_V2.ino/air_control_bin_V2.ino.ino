@@ -10,9 +10,6 @@
       /*  
 
 /*
-  == Hardware Map ==
-
-
 
 -- - Changelog - --
 24/11/2022 - Create
@@ -21,16 +18,35 @@
 04/12/2022 - JSON Parse Success
 04/12/2022 - Zabbix API Connection Success
 19/12/2022 - Create Debug mensages in Serial Monitor
+17/01/2023 - Include Temperature Sensor
+27/01/2023 - Include Trimpot 
+01/02/2023 - Include Serial Debug infos
+03/02/2023 - Version 1.0 finished!
+
+---------- Hardware Mapping --------
+Trimpot 1 - Analog 0
+
+Relay 1 - Digital 1  //GPIO 5
+Relay 2 - Digital 2  //GPIO 4
+ 
+DHT Sensor - Digital 6 //GPIO 12
+
 */
 
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include <DHT.h>
+
+// Constants DHT Sensor config 
+// ALERT !!!!!  THIS SENSOR HAVE A JOKE!!  !!!! USE ESP8266 GPIO TABLE 
+#define DHTPIN 12  // Digital 6
+#define DHTTYPE DHT22
 
 // Constants Module configs
 #define ESP_ID 01
-#define ESP_LOCATION "HEAA"
+#define ESP_LOCATION "Datacenter FMC"
 
 // Wifi Settings
 #ifndef STASSID
@@ -48,18 +64,17 @@ const char* password = STAPSK;
 //Variables
 int i;
 int time_to_inverter = 86400;  // Time in seconds to inverter relays / 86400 = 24 horas
-int temperature_limit = 30;
+int temperature_limit = 26;
 unsigned int contador = 1;
 unsigned int invert_relay_counter = 1;
 const int analog_pin_1 = A0;
 
 // Relay Pins
-const int relay_1_pin = 4; // Relay 1 Digital pin
-const int relay_2_pin = 0; // Relay 2 Digital pin
-const int relay_3_pin = 2; // Relay 2 Digital pin
-const int relay_4_pin = 14; // Relay 2 Digital pin
+const int relay_1_pin = 5; // Relay 1 Digital pin
+const int relay_2_pin = 4; // Relay 2 Digital pin
 
 // Sensor
+float sensor_1_trim = 0;
 float sensor_1_temp = 0;
 float sensor_1_humidity = 0;
 
@@ -69,7 +84,7 @@ int relay_2_status = OFF;
 int relay_3_status = OFF;
 int relay_4_status = OFF;
 
-// Relay Erros Status / 0 = OK / 1 = Failure
+// Relay Erros Status / 0 = OK / 1 = Failure | // Only back to 0 after system reset
 int relay_1_error = 0;
 int relay_2_error = 0;
 int relay_3_error = 0;
@@ -94,13 +109,13 @@ void air_inverter()
     }
 }
 
-// Temperature check and update Function
+// Temperature check and Status update Function
 void temperature_check()
 {
   if (sensor_1_temp >= temperature_limit && relay_1_error == 0 && relay_2_error == 0)
     {
       // Verify which relay is activated, and change error status to 1
-      if (relay_1_status == 1)
+      if (relay_1_status == ON)
       {
         relay_1_error = 1;
       } else { relay_2_error = 1; }
@@ -113,13 +128,13 @@ void temperature_check()
     }
 }
 
-// Temperature read Function
-float temp_read()
+// Temperature Trim Read Function / 
+float sensor1_TrimValue_Read()
 {
   float sensor_1_rawData = analogRead(analog_pin_1);
-  float sensor_1_rawDataMap=map(sensor_1_rawData, 0, 1023, 10, 50);
+  float sensor_1_trimValue=map(sensor_1_rawData, 0, 1023, -8, 8);
 
-  return sensor_1_rawDataMap;
+  return sensor_1_trimValue;
 }
 
 // Wifi Led Blink
@@ -131,27 +146,39 @@ void wifi_led_blink()
   delay(250);
 }
 
-// Create an instance of the server and specify the port to listen on as an argument
+// DHT Sensor Initialize
+DHT dhtSensor(DHTPIN, DHTTYPE);
+
+// Create instance to server and specify the port to listen on as an argument
 WiFiServer server(80);
 
 // Setup / Configurations
 void setup() {
+  // Pins mode Initialize
+  pinMode(relay_1_pin, OUTPUT);
+  pinMode(relay_2_pin, OUTPUT);
+
+  // Pins State Initialize
+  digitalWrite(relay_1_pin, ON);
+  digitalWrite(relay_2_pin, OFF);
+
+  dhtSensor.begin();
   Serial.begin(115200);
   delay(3000);
-  
+
   // ----- OTA Configuration ---- //
   // Port defaults to 8266
   // ArduinoOTA.setPort(8266);
 
   // Hostname defaults to esp8266-[ChipID]
-  // ArduinoOTA.setHostname("myesp8266");
+  ArduinoOTA.setHostname("esp-dht01");
 
   // No authentication by default
-  // ArduinoOTA.setPassword("admin");
+  ArduinoOTA.setPassword("admin");
 
   // Password can be set with it's md5 value as well
-  // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
-  // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+  //MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+  //ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
 
   ArduinoOTA.onStart([]() {
     String type;
@@ -185,28 +212,35 @@ void setup() {
     }
   });
   ArduinoOTA.begin();
-  Serial.println("Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  // Pins mode Initialize
-  pinMode(relay_1_pin, OUTPUT);
-  pinMode(relay_2_pin, OUTPUT);
-  pinMode(relay_3_pin, OUTPUT);
-  pinMode(relay_4_pin, OUTPUT);
   
-  // Pins State Initialize
-  digitalWrite(relay_1_pin, ON);
-  digitalWrite(relay_2_pin, OFF);
-  digitalWrite(relay_3_pin, ON);
-  digitalWrite(relay_4_pin, OFF);
+  // Debug Header Infos | First startup, is necessary read sensor temp and humidity before loop
+  sensor_1_temp = dhtSensor.readTemperature() + sensor_1_trim;
+  sensor_1_humidity = dhtSensor.readHumidity();
+  Serial.println("Device Initialize...");
+  Serial.print("Device Location: ");
+  Serial.println(ESP_LOCATION);
+  Serial.print("Device ID: ");
+  Serial.println(ESP_ID);
+  Serial.print("Wifi SSID: ");
+  Serial.println(STASSID);
+  Serial.print("Wifi Password: ");
+  Serial.println(STAPSK);
+  Serial.print("Sensor 1 Temp: ");
+  Serial.println(sensor_1_temp);
+  Serial.print("Sensor 1 Humidity: ");
+  Serial.println(sensor_1_humidity);
+  Serial.print("Sensor 1 Trim value: ");
+  Serial.println(sensor_1_trim);
+  Serial.println("Device Ready!");
 
-  // Connect to WiFi network
-  Serial.println();
+  // WIFI Debug infos
   Serial.println();
   Serial.print(F("Connecting to "));
   Serial.println(ssid);
-
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  
+  //  Wifi begin and Connect
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
@@ -250,9 +284,15 @@ void loop()
     // Call functions 
     air_inverter();
     temperature_check();
-    sensor_1_temp = temp_read();
+    
+    // sensor2
+    sensor_1_trim = sensor1_TrimValue_Read();
+    sensor_1_temp = dhtSensor.readTemperature() + sensor_1_trim;
+    sensor_1_humidity = dhtSensor.readHumidity();
     invert_relay_counter +=1;
     delay(1000);
+    //Serial.println(sensor_1_temp);
+    //Serial.println(sensor_1_trim);
     return;
   }
 
@@ -290,13 +330,14 @@ void loop()
   // Send the response to the client
   // it is OK for multiple small client.print/write,
   // because nagle algorithm will group them into one single packet
-  // client.print(F("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nGPIO is now "));   // Original line
+  // client.print(F("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nGPIO is now ")); // Original line
   client.print(F("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"));
   
   // Create JSON File
   client.print("{"); // Open Json
   client.println("\"ID\":\"" + String(ESP_ID) + "\",");
   client.println("\"LOCATION\":\"" + String(ESP_LOCATION) + "\",");
+  client.println("\"SENSOR_TEMP_1_TRIM_VALUE\":\"" + String(sensor_1_trim) + "\",");
   client.println("\"SENSOR_TEMP_1\":\"" + String(sensor_1_temp) + "\",");
   client.println("\"SENSOR_HUMIDITY_1\":\"" + String(sensor_1_humidity) + "\",");
   client.println("\"RELAY_1_STATUS\":\"" + String(relay_1_status) + "\",");

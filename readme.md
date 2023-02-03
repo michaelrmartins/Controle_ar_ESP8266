@@ -1,4 +1,4 @@
-*Controle de ar automatizado*
+*ESP-DHT - Controle de ar automatizado*
 
 ***
 
@@ -16,5 +16,5 @@ Fisical Ports at ESP8266 Board
 - Relay 1 - D2
 - Relay 2 - D3
 
-- Temperature *bias* - A0
+- Temperature *trimm* - A0
 
